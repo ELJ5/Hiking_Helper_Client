@@ -11,7 +11,9 @@ import SwiftUI
 struct Hiking_HelperApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack{
+                QuestionnaireView()
+            }
         }
     }
 }
