@@ -7,6 +7,11 @@ struct HikingHelperApp: App {
     
     
     init() {
+            // TEMPORARY: Clear all data for testing
+            UserDefaults.standard.removeObject(forKey: "userTrailPreferences")
+            UserDefaults.standard.removeObject(forKey: "savedHikingGoals")
+            UserDefaults.standard.removeObject(forKey: "questionnaireProgress")
+            
         let prefs = UserPreferences()
         _userPreferences = StateObject(wrappedValue: prefs)
         _dataManager = StateObject(wrappedValue: DataManager(userPreferences: prefs))

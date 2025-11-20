@@ -74,24 +74,22 @@ struct SettingsView: View {
                 }
                 
                 Section(header: Text("Location")) {
-                    HStack {
-                        Text("Location")
-                        Spacer()
-                        if let location = userPreferences.trailPreferences.location {
-                            Text(location)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("Not set")
-                                .foregroundColor(.secondary)
+                    NavigationLink {
+                        StateSelectionView(isOnboarding: false)
+                            .environmentObject(userPreferences)
+                            .environmentObject(dataManager)
+                    } label: {
+                        HStack {
+                            Text("Selected States")
+                            Spacer()
+                            if userPreferences.trailPreferences.selectedStates.isEmpty {
+                                Text("None")
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text(userPreferences.trailPreferences.selectedStatesText)
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                    }
-                    
-                    Picker("Travel Radius", selection: $userPreferences.trailPreferences.travelRadius) {
-                        Text("< 60 miles").tag("<60 miles")
-                        Text("60-100 miles").tag("60-100 miles")
-                        Text("100-125 miles").tag("100-125 miles")
-                        Text("125-250 miles").tag("125-250 miles")
-                        Text("250+ miles").tag("250+ miles")
                     }
                 }
                 

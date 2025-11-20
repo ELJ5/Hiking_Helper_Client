@@ -16,6 +16,9 @@ struct HomeView: View {
     @State private var navigateToChatbot = false
     @State private var navigateToGoals = false
     @State private var searchText = ""
+    @State private var showAllRecommended = false
+    @State private var showAllEasier = false
+    @State private var showAllOther = false
     
     // Standard initializer
     init() {
@@ -27,18 +30,26 @@ struct HomeView: View {
         self._goalDataManager = StateObject(wrappedValue: GoalDataManager(withTestData: withTestData))
     }
     
-    // Trails that match user preferences
+    // Trails that match user preferences perfectly
     func getMatchingTrails() -> [Trail] {
         let prefs = userPreferences.trailPreferences
         
         return dataManager.allTrails.filter { trail in
-            // Filter by difficulty
+            // Filter by selected states
+            if !prefs.selectedStates.isEmpty {
+                let trailStateCode = getStateCode(from: trail.state)
+                guard prefs.selectedStates.contains(trailStateCode) else {
+                    return false
+                }
+            }
+            
+            // Filter by difficulty - exact match
             let matchesDifficulty = trail.difficultyLevel.lowercased() == prefs.difficulty.lowercased()
             
-            // Filter by distance range
+            // Filter by distance range - within range
             let matchesDistance = trail.distanceMiles >= prefs.minDistance && trail.distanceMiles <= prefs.maxDistance
             
-            // Filter by elevation preference
+            // Filter by elevation preference - within range
             let matchesElevation: Bool
             switch prefs.elevation.lowercased() {
             case "low":
@@ -55,10 +66,42 @@ struct HomeView: View {
         }
     }
     
+    // Trails that are easier than user preferences (for building up)
+    func getEasierTrails() -> [Trail] {
+        let prefs = userPreferences.trailPreferences
+        let perfectMatchIds = Set(getMatchingTrails().map { $0.id })
+        
+        return dataManager.allTrails.filter { trail in
+            // Don't include trails that already perfectly match
+            guard !perfectMatchIds.contains(trail.id) else {
+                return false
+            }
+            
+            // Filter by selected states
+            if !prefs.selectedStates.isEmpty {
+                let trailStateCode = getStateCode(from: trail.state)
+                guard prefs.selectedStates.contains(trailStateCode) else {
+                    return false
+                }
+            }
+            
+            // Check if trail is easier in at least one dimension
+            let isEasierDifficulty = isDifficultyEasierOrEqual(trail.difficultyLevel, than: prefs.difficulty)
+            let isShorterDistance = trail.distanceMiles <= prefs.maxDistance
+            let isLowerElevation = isElevationLowerOrEqual(trail.elevationGainFeet, than: prefs.elevation)
+            
+            // Must be easier in at least one way and not harder in others
+            return isEasierDifficulty && isShorterDistance && isLowerElevation
+        }
+    }
+    
     // Trails that don't match user preferences (for exploration)
     func getNonMatchingTrails() -> [Trail] {
         let matchingIds = Set(getMatchingTrails().map { $0.id })
-        var results = dataManager.allTrails.filter { !matchingIds.contains($0.id) }
+        let easierIds = Set(getEasierTrails().map { $0.id })
+        let excludedIds = matchingIds.union(easierIds)
+        
+        var results = dataManager.allTrails.filter { !excludedIds.contains($0.id) }
         
         // Apply search filter if text entered
         if !searchText.isEmpty {
@@ -69,6 +112,36 @@ struct HomeView: View {
         }
         
         return results
+    }
+    
+    // Helper to check if difficulty is easier or equal
+    private func isDifficultyEasierOrEqual(_ trailDifficulty: String, than preferredDifficulty: String) -> Bool {
+        let difficultyLevels = ["easy": 1, "moderate": 2, "hard": 3, "very hard": 4]
+        let trailLevel = difficultyLevels[trailDifficulty.lowercased()] ?? 2
+        let preferredLevel = difficultyLevels[preferredDifficulty.lowercased()] ?? 2
+        return trailLevel <= preferredLevel
+    }
+    
+    // Helper to check if elevation is lower or equal
+    private func isElevationLowerOrEqual(_ trailElevation: Double, than preferredElevation: String) -> Bool {
+        switch preferredElevation.lowercased() {
+        case "low":
+            return trailElevation < 500
+        case "moderate":
+            return trailElevation < 1500
+        case "high":
+            return true // Everything is <= high
+        default:
+            return true
+        }
+    }
+    
+    // Helper to get state code from trail's state field
+    private func getStateCode(from stateString: String) -> String {
+        if stateString.count == 2 {
+            return stateString.uppercased()
+        }
+        return StateData.stateCode(for: stateString) ?? stateString.uppercased()
     }
     
     var body: some View {
@@ -160,6 +233,7 @@ struct HomeView: View {
                             HStack {
                                 Text("Goals")
                                     .font(.headline)
+                                    .padding(.top, 15)
                                 
                                 Spacer()
                                 
@@ -168,6 +242,7 @@ struct HomeView: View {
                                 }) {
                                     Image(systemName: "arrow.right.circle.fill")
                                         .foregroundColor(.green)
+                                        .padding(.top, 15)
                                 }
                             }
                             .padding(.horizontal)
@@ -280,16 +355,92 @@ struct HomeView: View {
                             .padding(.vertical, 20)
                         } else {
                             VStack(spacing: 10) {
-                                ForEach(getMatchingTrails()) { trail in
+                                ForEach(getMatchingTrails().prefix(showAllRecommended ? getMatchingTrails().count : 3)) { trail in
                                     TrailSearchResultRow(
                                         trail: trail,
                                         isCompleted: userPreferences.trailPreferences.isTrailCompleted(trail.id)
                                     )
                                 }
+                                
+                                if getMatchingTrails().count > 3 {
+                                    Button(action: {
+                                        withAnimation {
+                                            showAllRecommended.toggle()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(showAllRecommended ? "Show Less" : "Show \(getMatchingTrails().count - 3) More")
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                            Image(systemName: showAllRecommended ? "chevron.up" : "chevron.down")
+                                                .font(.caption)
+                                        }
+                                        .foregroundColor(.blue)
+                                        .padding(.vertical, 8)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    .padding(.top, 4)
+                                }
                             }
                         }
                     }
                     .padding(.horizontal)
+                    
+                    // Build Up Trails (easier than preferences)
+                    if !getEasierTrails().isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Build Up To Your Goals")
+                                        .font(.title2)
+                                        .bold()
+                                    Text("Easier trails to help you progress")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Text("\(getEasierTrails().count) trails")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            VStack(spacing: 10) {
+                                ForEach(getEasierTrails().prefix(showAllEasier ? getEasierTrails().count : 3)) { trail in
+                                    TrailSearchResultRow(
+                                        trail: trail,
+                                        isCompleted: userPreferences.trailPreferences.isTrailCompleted(trail.id)
+                                    )
+                                }
+                                
+                                if getEasierTrails().count > 3 {
+                                    Button(action: {
+                                        withAnimation {
+                                            showAllEasier.toggle()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(showAllEasier ? "Show Less" : "Show \(getEasierTrails().count - 3) More")
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                            Image(systemName: showAllEasier ? "chevron.up" : "chevron.down")
+                                                .font(.caption)
+                                        }
+                                        .foregroundColor(.green)
+                                        .padding(.vertical, 8)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.green.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    .padding(.top, 4)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                     
                     // Explore Other Trails (non-matching)
                     VStack(alignment: .leading, spacing: 12) {
@@ -337,18 +488,33 @@ struct HomeView: View {
                             .padding(.vertical, 20)
                         } else {
                             VStack(spacing: 10) {
-                                ForEach(getNonMatchingTrails().prefix(10)) { trail in
+                                ForEach(getNonMatchingTrails().prefix(showAllOther ? getNonMatchingTrails().count : 2)) { trail in
                                     TrailSearchResultRow(
                                         trail: trail,
                                         isCompleted: userPreferences.trailPreferences.isTrailCompleted(trail.id)
                                     )
                                 }
                                 
-                                if getNonMatchingTrails().count > 10 {
-                                    Text("+\(getNonMatchingTrails().count - 10) more trails")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .padding(.top, 4)
+                                if getNonMatchingTrails().count > 2 {
+                                    Button(action: {
+                                        withAnimation {
+                                            showAllOther.toggle()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(showAllOther ? "Show Less" : "Show \(getNonMatchingTrails().count - 2) More")
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                            Image(systemName: showAllOther ? "chevron.up" : "chevron.down")
+                                                .font(.caption)
+                                        }
+                                        .foregroundColor(.orange)
+                                        .padding(.vertical, 8)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.orange.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    .padding(.top, 4)
                                 }
                             }
                         }
@@ -387,6 +553,11 @@ struct HomeView: View {
         .navigationDestination(isPresented: $navigateToGoals) {
             GoalsView(userPreferences: userPreferences, goalDataManager: goalDataManager)
         }
+        .onAppear {
+            // Load trails if not already loaded
+            dataManager.loadTrailsIfNeeded()
+            print("📍 HomeView appeared - allTrails count: \(dataManager.allTrails.count)")
+        }
     }
 }
 
@@ -397,48 +568,57 @@ struct TrailSearchResultRow: View {
     let isCompleted: Bool
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Difficulty indicator
-            Circle()
-                .fill(difficultyColor)
-                .frame(width: 10, height: 10)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(trail.trailName)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .lineLimit(1)
-                    
-                    if isCompleted {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.green)
+        NavigationLink {
+            TrailDetailView(trail: trail)
+        } label: {
+            HStack(spacing: 12) {
+                // Difficulty indicator
+                Circle()
+                    .fill(difficultyColor)
+                    .frame(width: 10, height: 10)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(trail.trailName)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                            .foregroundColor(.primary)
+                        
+                        if isCompleted {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                        }
                     }
+                    
+                    HStack(spacing: 8) {
+                        Label(String(format: "%.1f mi", trail.distanceMiles), systemImage: "figure.walk")
+                        Label("\(Int(trail.elevationGainFeet)) ft", systemImage: "arrow.up.right")
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
                 }
                 
-                HStack(spacing: 8) {
-                    Label(String(format: "%.1f mi", trail.distanceMiles), systemImage: "figure.walk")
-                    Label("\(Int(trail.elevationGainFeet)) ft", systemImage: "arrow.up.right")
-                }
-                .font(.caption2)
-                .foregroundColor(.secondary)
+                Spacer()
+                
+                // Difficulty badge
+                Text(trail.difficultyLevel)
+                    .font(.caption2)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(difficultyColor.opacity(0.1))
+                    .foregroundColor(difficultyColor)
+                    .cornerRadius(4)
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
-            
-            Spacer()
-            
-            // Difficulty badge
-            Text(trail.difficultyLevel)
-                .font(.caption2)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(difficultyColor.opacity(0.1))
-                .foregroundColor(difficultyColor)
-                .cornerRadius(4)
+            .padding(12)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
         }
-        .padding(12)
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
     }
     
     private var difficultyColor: Color {

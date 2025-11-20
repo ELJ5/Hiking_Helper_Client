@@ -8,9 +8,8 @@ struct QuestionnaireView: View {
     @State private var questions: [Question] = []
     @State private var showResults = false
     @State private var navigateToResults = false
+    @State private var navigateToStateSelection = false
     @State private var currentQuestion = 0
-    @State private var showLocationInput = false
-    @State private var cityInput = ""
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
@@ -39,27 +38,59 @@ struct QuestionnaireView: View {
                                 .font(.headline)
                                 .multilineTextAlignment(.leading)
                             
-                            // Handle text input for city
-                            if question.preferenceKey == "location" && question.selectedOption == "input" {
+                            // Handle state selection question
+                            if question.preferenceKey == "stateSelection" {
                                 VStack(spacing: 12) {
-                                    TextField("Enter city name", text: $cityInput)
-                                        .textFieldStyle(.roundedBorder)
-                                        .padding(.vertical, 8)
-                                        .focused($isTextFieldFocused)
-                                        .submitLabel(.done)
-                                        .onSubmit {
-                                            submitCityInput()
+                                    // Show currently selected states
+                                    if !userPreferences.trailPreferences.selectedStates.isEmpty {
+                                        HStack {
+                                            Text("Selected:")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Text(userPreferences.trailPreferences.selectedStatesText)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.green)
                                         }
-                                    
-                                    Button(action: submitCityInput) {
-                                        Text("Continue")
-                                            .frame(maxWidth: .infinity)
-                                            .padding()
-                                            .background(!cityInput.trimmingCharacters(in: .whitespaces).isEmpty ? Color.blue : Color.gray)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
+                                        .padding(.vertical, 4)
                                     }
-                                    .disabled(cityInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                                    
+                                    Button(action: {
+                                        navigateToStateSelection = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "map.fill")
+                                            Text(userPreferences.trailPreferences.selectedStates.isEmpty
+                                                 ? "Select States"
+                                                 : "Change Selection")
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                    }
+                                    
+                                    if !userPreferences.trailPreferences.selectedStates.isEmpty {
+                                        Button(action: {
+                                            // Mark as answered and continue
+                                            questions[currentQuestion].selectedOption = userPreferences.trailPreferences.selectedStatesText
+                                            QuestionnaireManager.save(questions)
+                                            
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                withAnimation {
+                                                    advanceToNextQuestion()
+                                                }
+                                            }
+                                        }) {
+                                            Text("Continue with \(userPreferences.trailPreferences.selectedStates.count) state\(userPreferences.trailPreferences.selectedStates.count == 1 ? "" : "s")")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(Color.blue)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+                                    }
                                 }
                             } else {
                                 // Radio button options
@@ -96,6 +127,20 @@ struct QuestionnaireView: View {
             .onAppear(perform: loadQuestions)
             .navigationDestination(isPresented: $navigateToResults) {
                 HomeView()
+            }
+            .navigationDestination(isPresented: $navigateToStateSelection) {
+                StateSelectionView(isOnboarding: true) {
+                    // Called when user completes state selection
+                    navigateToStateSelection = false
+                    
+                    // Update the question answer
+                    if !userPreferences.trailPreferences.selectedStates.isEmpty {
+                        questions[currentQuestion].selectedOption = userPreferences.trailPreferences.selectedStatesText
+                        QuestionnaireManager.save(questions)
+                    }
+                }
+                .environmentObject(userPreferences)
+                .environmentObject(dataManager)
             }
         }
     }
@@ -157,15 +202,9 @@ struct QuestionnaireView: View {
                 ),
                 
                 Question(
-                    text: "Can we use your location to find nearby trails?",
-                    options: ["Yes, use my location", "No, I'll enter a city"],
-                    preferenceKey: "locationPermission"
-                ),
-                
-                Question(
-                    text: "Enter your city or preferred area:",
-                    options: ["input"],
-                    preferenceKey: "location"
+                    text: "Which states would you like to explore trails in?",
+                    options: [], // Empty - handled by StateSelectionView
+                    preferenceKey: "stateSelection"
                 ),
                 
                 Question(
@@ -195,24 +234,6 @@ struct QuestionnaireView: View {
         }
     }
     
-    func submitCityInput() {
-        let trimmedInput = cityInput.trimmingCharacters(in: .whitespaces)
-        guard !trimmedInput.isEmpty else { return }
-        
-        questions[currentQuestion].selectedOption = trimmedInput
-        QuestionnaireManager.save(questions)
-        
-        // Dismiss keyboard
-        isTextFieldFocused = false
-        
-        // Advance to next question
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation {
-                advanceToNextQuestion()
-            }
-        }
-    }
-    
     func advanceToNextQuestion() {
         if currentQuestion < questions.count - 1 {
             currentQuestion += 1
@@ -233,13 +254,14 @@ struct QuestionnaireView: View {
         prefs.hasCompletedOnboarding = true
         userPreferences.trailPreferences = prefs
         
-        // Load hiking data
+        // Load hiking data for selected states
         dataManager.loadTrailsIfNeeded()
         
         // Navigate to home
         navigateToResults = true
         
         print("✅ Preferences saved: \(userPreferences.trailPreferences)")
+        print("✅ Selected states: \(userPreferences.trailPreferences.selectedStates)")
     }
     
     func updateUserPreferences() {
@@ -272,13 +294,9 @@ struct QuestionnaireView: View {
             case "elevation":
                 prefs.elevation = answer.components(separatedBy: " (").first ?? answer
                 
-                //Fix this here:
-                //maybe option of states to select
-            case "locationPermission":
+            case "stateSelection":
+                // States are already saved directly to preferences via StateSelectionView
                 break
-                
-            case "location":
-                prefs.location = answer == "input" ? nil : answer
                 
             case "travelRadius":
                 prefs.travelRadius = answer
@@ -318,13 +336,9 @@ struct QuestionnaireView: View {
     let prefs = UserPreferences()
     let dataManager = DataManager(userPreferences: prefs)
     
-    // Initialize with mock data to avoid crashes
     let view = QuestionnaireView()
     
     return view
         .environmentObject(prefs)
         .environmentObject(dataManager)
-        .onAppear {
-            // Prevent any persistence calls in preview
-        }
 }

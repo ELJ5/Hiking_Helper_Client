@@ -14,7 +14,7 @@ struct FilterPreferences: Codable {
     var maxDistance: Double
     var elevation: String
     var helper: Bool
-    var location: String?
+    var location: String
     var travelRadius: String  // Distance willing to travel
 
     
@@ -32,7 +32,7 @@ struct FilterPreferences: Codable {
         maxDistance: 3.0,
         elevation: "Low",
         helper: true,
-        location: nil,
+        location: "SC",
         travelRadius: "<60 miles",
         hikingFrequency: "Never have",
         currentCapability: "0-2 miles",
