@@ -20,6 +20,7 @@ struct HikingHelperApp: App {
                 .environmentObject(userPreferences)
                 .environmentObject(dataManager)
                 .onAppear {
+
                     // Debug: List all JSON files in bundle
                     if let resourcePath = Bundle.main.resourcePath {
                         do {

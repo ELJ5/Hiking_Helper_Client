@@ -202,6 +202,7 @@ class OpenAIService {
         
         return prompt
     }
+    
 }
 
 // MARK: - OpenAI Response Models

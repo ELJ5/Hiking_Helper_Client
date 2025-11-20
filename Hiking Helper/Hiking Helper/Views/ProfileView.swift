@@ -33,6 +33,10 @@ struct ProfileView: View {
                     HomeView()
                       .environmentObject(userPreferences)
                       .environmentObject(dataManager)
+                      .transition(
+                          .move(edge: .leading)
+                          .combined(with: .opacity)
+                      )
                 }
                 Spacer()
                 Button(action: {

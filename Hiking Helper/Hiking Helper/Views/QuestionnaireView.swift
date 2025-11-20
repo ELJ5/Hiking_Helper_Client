@@ -272,6 +272,8 @@ struct QuestionnaireView: View {
             case "elevation":
                 prefs.elevation = answer.components(separatedBy: " (").first ?? answer
                 
+                //Fix this here:
+                //maybe option of states to select
             case "locationPermission":
                 break
                 
