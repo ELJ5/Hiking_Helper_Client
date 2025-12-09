@@ -30,14 +30,14 @@ struct SettingsView: View {
                         Text("Minimum Distance: \(userPreferences.trailPreferences.minDistance, specifier: "%.1f") miles")
                             .font(.subheadline)
                         Slider(value: $userPreferences.trailPreferences.minDistance, in: 0...20, step: 0.5)
-                            .tint(.green)
+                            .tint( .primaryGreen)
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Maximum Distance: \(userPreferences.trailPreferences.maxDistance, specifier: "%.1f") miles")
                             .font(.subheadline)
                         Slider(value: $userPreferences.trailPreferences.maxDistance, in: 0...20, step: 0.5)
-                            .tint(.green)
+                            .tint( .primaryGreen)
                     }
                 }
                 
@@ -127,6 +127,7 @@ struct SettingsView: View {
                     Button("Refresh Data") {
                         dataManager.refresh()
                     }
+                    .foregroundColor(.darkBlue)
                     .disabled(dataManager.isLoading)
                     
                     if dataManager.isLoading {
@@ -145,6 +146,7 @@ struct SettingsView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .foregroundColor(.darkBlue)
                 }
             }
         }

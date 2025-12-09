@@ -24,7 +24,7 @@ struct HomeView: View {
     @State private var cameraPosition: MapCameraPosition = .automatic
     @State private var selectedTrail: Trail?
     
-    // Standard initializer
+    // initializer
     init() {
         self._goalDataManager = StateObject(wrappedValue: GoalDataManager())
     }
@@ -47,13 +47,13 @@ struct HomeView: View {
                 }
             }
             
-            // Filter by difficulty - exact match
+            // Match Difficulty
             let matchesDifficulty = trail.difficultyLevel.lowercased() == prefs.difficulty.lowercased()
             
-            // Filter by distance range - within range
+            // Trail Distance within range
             let matchesDistance = trail.distanceMiles >= prefs.minDistance && trail.distanceMiles <= prefs.maxDistance
             
-            // Filter by elevation preference - within range
+            // Trail Elevation within range
             let matchesElevation: Bool
             switch prefs.elevation.lowercased() {
             case "low":
@@ -70,7 +70,7 @@ struct HomeView: View {
         }
     }
     
-    // Trails that are easier than user preferences (for building up)
+    // Trails that are easier than user preferences
     func getEasierTrails() -> [Trail] {
         let prefs = userPreferences.trailPreferences
         let perfectMatchIds = Set(getMatchingTrails().map { $0.id })
@@ -89,7 +89,7 @@ struct HomeView: View {
                 }
             }
             
-            // Check if trail is easier in at least one dimension
+            // Check if trail is easier in at least one way
             let isEasierDifficulty = isDifficultyEasierOrEqual(trail.difficultyLevel, than: prefs.difficulty)
             let isShorterDistance = trail.distanceMiles <= prefs.maxDistance
             let isLowerElevation = isElevationLowerOrEqual(trail.elevationGainFeet, than: prefs.elevation)
@@ -99,7 +99,7 @@ struct HomeView: View {
         }
     }
     
-    // Trails that don't match user preferences (for exploration)
+    // Rest of trails not matching preferences
     func getNonMatchingTrails() -> [Trail] {
         let matchingIds = Set(getMatchingTrails().map { $0.id })
         let easierIds = Set(getEasierTrails().map { $0.id })
@@ -172,6 +172,7 @@ struct HomeView: View {
                 }
             }
             
+            
             // Chatbot overlay
             if showChatbot {
                 ChatbotView(isPresentedBot: $showChatbot)
@@ -196,6 +197,7 @@ struct HomeView: View {
                     .zIndex(1)
             }
         }
+
         .animation(.easeInOut(duration: 0.3), value: showChatbot)
         .animation(.easeInOut(duration: 0.3), value: showProfile)
         .navigationDestination(isPresented: $navigateToGoals) {
@@ -208,7 +210,10 @@ struct HomeView: View {
         .onChange(of: userPreferences.trailPreferences.selectedStates) { _, _ in
             updateMapRegion()
         }
+
     }
+
+    
     
     // MARK: - View Components
     
@@ -222,7 +227,7 @@ struct HomeView: View {
                 }) {
                     Image(systemName: showChatbot ? "xmark.circle.fill" : "message.fill")
                         .font(.title)
-                        .foregroundColor(.primaryGreen)  // Changed
+                        .foregroundColor(.primaryGreen)   
                         .padding(.leading, 20)
                         .padding(.top, 10)
                 }
@@ -237,7 +242,7 @@ struct HomeView: View {
             }) {
                 Image(systemName: showProfile ? "xmark.circle.fill" : "person.fill")
                     .font(.title)
-                    .foregroundColor(.primaryBlue)  // Changed
+                    .foregroundColor(.primaryGreen)   
                     .padding(.trailing, 20)
                     .padding(.top, 10)
             }
@@ -266,13 +271,13 @@ struct HomeView: View {
             
             ZStack {
                 Circle()
-                    .stroke(.borderColor1, lineWidth: 10)  // Changed
+                    .stroke(.borderColor1, lineWidth: 10)   
                 
                 Circle()
                     .trim(from: 0, to: CGFloat(goalDataManager.completionPercentage / 100))
                     .stroke(
                         LinearGradient(
-                            gradient: Gradient(colors: [.primaryGreen, .primaryBlue]),
+                            gradient: Gradient(colors: [.primaryBlue, .primaryGreen]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -285,15 +290,16 @@ struct HomeView: View {
                     Text("\(goalDataManager.completedGoals.count)")
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.primaryGreen)  // Changed
+                        .foregroundColor(.primaryGreen)   
                     Text("of \(goalDataManager.goals.count)")
                         .font(.caption)
-                        .foregroundColor(.textSecondary)  // Changed
+                        .foregroundColor(.textSecondary)   
                 }
             }
             .frame(width: 125, height: 125)
             .padding()
         }
+        
     }
 
     private var goalsChecklist: some View {
@@ -310,7 +316,7 @@ struct HomeView: View {
                     navigateToGoals = true
                 }) {
                     Image(systemName: "arrow.right.circle.fill")
-                        .foregroundColor(.primaryBlue)  // Changed
+                        .foregroundColor(.primaryBlue)   
                         .padding(.top, 15)
                 }
             }
@@ -321,7 +327,7 @@ struct HomeView: View {
         .frame(height: 200)
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color.surface)  // Changed
+                .fill(.surface)
         )
         .frame(maxWidth: .infinity)
     }
@@ -332,7 +338,7 @@ struct HomeView: View {
             VStack(spacing: 8) {
                 Image(systemName: "target")
                     .font(.title2)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
                 Text("No goals yet")
                     .font(.caption)
                     .foregroundColor(.textSecondary)
@@ -342,7 +348,7 @@ struct HomeView: View {
                     Text("Add Goals")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(.primaryBlue)  // Changed
+                        .foregroundColor(.primaryBlue)   
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -351,7 +357,7 @@ struct HomeView: View {
             VStack(spacing: 8) {
                 Image(systemName: "trophy.fill")
                     .font(.title2)
-                    .foregroundColor(.accentGreen)  // Changed from yellow
+                    .foregroundColor(.yellow)
                 Text("All done!")
                     .font(.caption)
                     .foregroundColor(.textSecondary)
@@ -367,7 +373,7 @@ struct HomeView: View {
                                 goalDataManager.toggleGoalCompletion(id: goal.id)
                             }) {
                                 Image(systemName: "circle")
-                                    .foregroundColor(.primaryBlue)  // Changed
+                                    .foregroundColor(.primaryBlue)   
                             }
                             .buttonStyle(PlainButtonStyle())
                             
@@ -406,14 +412,14 @@ struct HomeView: View {
                         .foregroundColor(.textPrimary)  // Added
                     Text("Trails matching your Preferences")
                         .font(.caption)
-                        .foregroundColor(.textSecondary)  // Changed
+                        .foregroundColor(.textSecondary)   
                 }
                 
                 Spacer()
                 
                 Text("\(getMatchingTrails().count) trails")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
             }
             
             recommendedTrailsList
@@ -427,13 +433,13 @@ struct HomeView: View {
             VStack(spacing: 8) {
                 Image(systemName: "leaf")
                     .font(.title)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
                 Text("No trails match your preferences")
                     .font(.subheadline)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
                 Text("Try adjusting your settings in Profile")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
@@ -459,10 +465,10 @@ struct HomeView: View {
                             Image(systemName: showAllRecommended ? "chevron.up" : "chevron.down")
                                 .font(.caption)
                         }
-                        .foregroundColor(.primaryBlue)  // Changed
+                        .foregroundColor(.primaryBlue)   
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
-                        .background(Color.primaryBlue.opacity(0.1))  // Changed
+                        .background(Color.primaryBlue.opacity(0.1))   
                         .cornerRadius(8)
                     }
                     .padding(.top, 4)
@@ -483,14 +489,14 @@ struct HomeView: View {
                             .foregroundColor(.textPrimary)  // Added
                         Text("Easier trails to help you progress")
                             .font(.caption)
-                            .foregroundColor(.textSecondary)  // Changed
+                            .foregroundColor(.textSecondary)   
                     }
                     
                     Spacer()
                     
                     Text("\(getEasierTrails().count) trails")
                         .font(.caption)
-                        .foregroundColor(.textSecondary)  // Changed
+                        .foregroundColor(.textSecondary)   
                 }
                 
                 VStack(spacing: 10) {
@@ -514,10 +520,10 @@ struct HomeView: View {
                                 Image(systemName: showAllEasier ? "chevron.up" : "chevron.down")
                                     .font(.caption)
                             }
-                            .foregroundColor(.primaryGreen)  // Changed from darkGreen
+                            .foregroundColor(.primaryGreen)
                             .padding(.vertical, 8)
                             .frame(maxWidth: .infinity)
-                            .background(Color.lightGreen.opacity(0.1))  // Changed
+                            .background(Color.lightGreen.opacity(0.1))
                             .cornerRadius(8)
                         }
                         .padding(.top, 4)
@@ -540,7 +546,7 @@ struct HomeView: View {
                 
                 Text("\(getNonMatchingTrails().count) trails")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
             }
             
             searchBar
@@ -552,7 +558,7 @@ struct HomeView: View {
     private var searchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.textSecondary)  // Changed
+                .foregroundColor(.textSecondary)   
             
             TextField("Search by name or state", text: $searchText)
                 .textFieldStyle(PlainTextFieldStyle())
@@ -560,12 +566,12 @@ struct HomeView: View {
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.textSecondary)  // Changed
+                        .foregroundColor(.textSecondary)   
                 }
             }
         }
         .padding(12)
-        .background(Color.surface)  // Changed
+        .background(Color.surface)   
         .cornerRadius(10)
     }
 
@@ -575,10 +581,10 @@ struct HomeView: View {
             VStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.title)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)
                 Text(searchText.isEmpty ? "All trails match your preferences!" : "No trails found")
                     .font(.subheadline)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
@@ -604,10 +610,10 @@ struct HomeView: View {
                             Image(systemName: showAllOther ? "chevron.up" : "chevron.down")
                                 .font(.caption)
                         }
-                        .foregroundColor(.accentBlue)  // Changed from orange
+                        .foregroundColor(.accentBlue)
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
-                        .background(Color.accentBlue.opacity(0.1))  // Changed
+                        .background(Color.accentBlue.opacity(0.1))
                         .cornerRadius(8)
                     }
                     .padding(.top, 4)
@@ -621,7 +627,7 @@ struct HomeView: View {
             Text("Recommended Trails Map")
                 .font(.title2)
                 .bold()
-                .foregroundColor(.textPrimary)  // Added
+                .foregroundColor(.textPrimary)
                 .padding(.top, 20)
             
             mapContent
@@ -634,16 +640,16 @@ struct HomeView: View {
         if getMatchingTrails().isEmpty {
             ZStack {
                 RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.surface)  // Changed
+                    .fill(Color.surface)
                     .frame(height: 300)
                 
                 VStack {
                     Image(systemName: "map.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.primaryBlue)  // Changed
+                        .foregroundColor(.primaryBlue)
                     Text("No recommended trails to show")
                         .font(.caption)
-                        .foregroundColor(.textSecondary)  // Changed
+                        .foregroundColor(.textSecondary)
                 }
             }
         } else {
@@ -692,6 +698,7 @@ struct HomeView: View {
                     Text(trail.trailName)
                         .font(.headline)
                         .foregroundColor(.textPrimary)  // Added
+
                     
                     HStack(spacing: 12) {
                         Label(String(format: "%.1f mi", trail.distanceMiles), systemImage: "figure.walk")
@@ -703,9 +710,10 @@ struct HomeView: View {
                             .background(difficultyColor(for: trail.difficultyLevel).opacity(0.2))
                             .foregroundColor(difficultyColor(for: trail.difficultyLevel))
                             .cornerRadius(4)
+                        
                     }
                     .font(.caption)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
                 }
                 
                 Spacer()
@@ -721,13 +729,13 @@ struct HomeView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.primaryBlue)  // Changed
+                        .background(Color.primaryBlue)   
                         .cornerRadius(8)
                 }
             }
         }
         .padding(12)
-        .background(Color.surface)  // Changed
+        .background(Color.surface)
         .cornerRadius(10)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
@@ -768,13 +776,13 @@ struct HomeView: View {
     private func difficultyColor(for difficulty: String) -> Color {
         switch difficulty.lowercased() {
         case "easy":
-            return .lightGreen  // Changed
+            return .green
         case "moderate":
-            return .accentBlue  // Changed
+            return .orange
         case "hard", "difficult", "challenging":
-            return .darkGreen  // Changed
+            return .red
         default:
-            return .textSecondary  // Changed
+            return .textSecondary
         }
     }
 }
@@ -806,12 +814,12 @@ struct TrailSearchResultRow: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .lineLimit(1)
-                            .foregroundColor(.textPrimary)  // Changed
+                            .foregroundColor(.textPrimary)
                         
                         if isCompleted {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.caption)
-                                .foregroundColor(.primaryGreen)  // Changed
+                                .foregroundColor(.primaryGreen)
                         }
                     }
                     
@@ -820,7 +828,7 @@ struct TrailSearchResultRow: View {
                         Label("\(Int(trail.elevationGainFeet)) ft", systemImage: "arrow.up.right")
                     }
                     .font(.caption2)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)
                 }
                 
                 Spacer()
@@ -836,24 +844,28 @@ struct TrailSearchResultRow: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.textSecondary)  // Changed
+                    .foregroundColor(.textSecondary)   
             }
             .padding(12)
-            .background(Color.surface)  // Changed
+            .background(Color.surface)   
             .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16) // Define the rounded rectangle shape
+                    .stroke(Color.borderColor1, lineWidth: 1) // Apply a stroke to the rectangle for the border
+            )
         }
     }
     
     private var difficultyColor: Color {
         switch trail.difficultyLevel.lowercased() {
         case "easy":
-            return .lightGreen  // Changed
+            return .green
         case "moderate":
-            return .accentBlue  // Changed
+            return .orange
         case "hard", "difficult", "challenging":
-            return .darkGreen  // Changed
+            return .red
         default:
-            return .textSecondary  // Changed
+            return .textSecondary
         }
     }
 }

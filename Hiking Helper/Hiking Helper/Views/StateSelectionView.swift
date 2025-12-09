@@ -47,7 +47,7 @@ struct StateSelectionView: View {
                 VStack(spacing: 12) {
                     Image(systemName: "map.fill")
                         .font(.system(size: 50))
-                        .foregroundColor(.green)
+                        .foregroundColor(.primaryGreen)
                     
                     Text("Select Your States")
                         .font(.title)
@@ -164,7 +164,7 @@ struct StateSelectionView: View {
                             .background(
                                 userPreferences.trailPreferences.selectedStates.isEmpty
                                     ? Color.gray
-                                    : Color.green
+                                    : Color.primaryGreen
                             )
                             .cornerRadius(12)
                     }
@@ -213,7 +213,7 @@ struct StateRow: View {
                 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(.primaryGreen)
                         .font(.title2)
                 } else {
                     Image(systemName: "circle")
@@ -273,8 +273,8 @@ struct StateChip: View {
             .fontWeight(.medium)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Color.green.opacity(0.2))
-            .foregroundColor(.green)
+            .background(Color.primaryGreen.opacity(0.2))
+            .foregroundColor(.primaryGreen)
             .cornerRadius(16)
     }
 }

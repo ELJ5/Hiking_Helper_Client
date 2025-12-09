@@ -100,11 +100,31 @@ struct TrailDetailView: View {
                         }
                     }
                     
+                    // Replace the Quick Stats section with this:
+
                     // Quick Stats
-                    HStack(spacing: 20) {
-                        StatBox(icon: "figure.walk", value: String(format: "%.1f", trail.distanceMiles), label: "Miles", color: .primaryBlue)
-                        StatBox(icon: "arrow.up.right", value: "\(Int(trail.elevationGainFeet))", label: "Elevation (ft)", color: .lightBlue)
-                        StatBox(icon: "gauge.medium", value: trail.difficultyLevel, label: "Difficulty", color: difficultyColor)
+                    VStack(spacing: 12) {
+                        // Top row: Distance and Elevation
+                        HStack(spacing: 12) {
+                            StatBox(
+                                icon: "figure.walk",
+                                value: String(format: "%.1f mi", trail.distanceMiles),
+                                color: .primaryBlue
+                            )
+                            
+                            StatBox(
+                                icon: "arrow.up.right",
+                                value: "\(Int(trail.elevationGainFeet)) ft",
+                                color: .primaryBlue
+                            )
+                        }
+                        
+                        // Bottom row: Difficulty (full width)
+                        StatBox(
+                            icon: "gauge.medium",
+                            value: trail.difficultyLevel,
+                            color: difficultyColor
+                        )
                     }
                     
                     Divider()
@@ -147,8 +167,8 @@ struct TrailDetailView: View {
                                         .font(.caption)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
-                                        .background(Color.green.opacity(0.2))
-                                        .foregroundColor(.green)
+                                        .background(Color.lightGreen.opacity(0.2))
+                                        .foregroundColor(.darkGreen)
                                         .cornerRadius(16)
                                 }
                             }
@@ -224,6 +244,7 @@ struct TrailDetailView: View {
                 }) {
                     Image(systemName: "square.and.arrow.up")
                 }
+                .foregroundColor(.primaryGreen)
             }
         }
     }
@@ -233,11 +254,11 @@ struct TrailDetailView: View {
     private var difficultyColor: Color {
         switch trail.difficultyLevel.lowercased() {
         case "easy":
-            return .lightGreen
+            return .green
         case "moderate":
-            return .lightBlue
+            return .orange
         case "hard", "very hard":
-            return .darkBlue
+            return .red
         default:
             return .secondary
         }
@@ -268,82 +289,32 @@ struct TrailDetailView: View {
     }
 }
 
+
+
 // MARK: - Stat Box Component
 
 struct StatBox: View {
     let icon: String
     let value: String
-    let label: String
     let color: Color
     
     var body: some View {
-        VStack(spacing: 8) {
+        HStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.title2)
+                .font(.title3)
                 .foregroundColor(color)
             
             Text(value)
                 .font(.headline)
-                .fontWeight(.bold)
-            
-            Text(label)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+                .fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.lightBlue))
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(color.opacity(0.15))
         .cornerRadius(12)
     }
 }
-
-// MARK: - Flow Layout (for terrain tags)
-
-//struct FlowLayout: Layout {
-//    var spacing: CGFloat = 8
-//    
-//    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-//        let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
-//        return result.size
-//    }
-//    
-//    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-//        let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
-//        for (index, subview) in subviews.enumerated() {
-//            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
-//                                      y: bounds.minY + result.positions[index].y),
-//                         proposal: .unspecified)
-//        }
-//    }
-//    
-//    struct FlowResult {
-//        var size: CGSize = .zero
-//        var positions: [CGPoint] = []
-//        
-//        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
-//            var x: CGFloat = 0
-//            var y: CGFloat = 0
-//            var rowHeight: CGFloat = 0
-//            
-//            for subview in subviews {
-//                let size = subview.sizeThatFits(.unspecified)
-//                
-//                if x + size.width > maxWidth && x > 0 {
-//                    x = 0
-//                    y += rowHeight + spacing
-//                    rowHeight = 0
-//                }
-//                
-//                positions.append(CGPoint(x: x, y: y))
-//                rowHeight = max(rowHeight, size.height)
-//                x += size.width + spacing
-//            }
-//            
-//            self.size = CGSize(width: maxWidth, height: y + rowHeight)
-//        }
-//    }
-//}
 
 // MARK: - Preview
 

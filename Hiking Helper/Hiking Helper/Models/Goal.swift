@@ -4,14 +4,6 @@
 //
 //  Created by Eliana Johnson on 11/19/25.
 //
-
-//import Foundation
-//struct Goal: Identifiable, Codable {
-//    let id: Int
-//    let description: String
-//    let achieved: Bool
-//}
-
 import Foundation
 
 struct Goal: Identifiable, Codable, Equatable {

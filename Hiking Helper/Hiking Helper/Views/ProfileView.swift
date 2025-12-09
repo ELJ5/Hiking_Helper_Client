@@ -35,27 +35,27 @@ struct ProfileView: View {
                                 }){
                                     Image(systemName: "house.fill")
                                         .font(.title)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.primaryBlue)
                                         .padding(.leading, 10)
                                         .padding(.top, 10)
                                 }
                
                 Spacer()
             
-                Button(action: {
-                    navigateToSettings = true
-                }){
-                    Image(systemName: "gearshape.fill")
-                        .font(.title)
-                        .foregroundColor(.blue)
-                        .padding(.trailing, 10)
-                        .padding(.top, 10)
-                }
-                .sheet(isPresented: $navigateToSettings) {
-                    SettingsView()
-                        .environmentObject(userPreferences)
-                        .environmentObject(dataManager)
-                }
+//                Button(action: {
+//                    navigateToSettings = true
+//                }){
+//                    Image(systemName: "gearshape.fill")
+//                        .font(.title)
+//                        .foregroundColor(.primaryBlue)
+//                        .padding(.trailing, 10)
+//                        .padding(.top, 10)
+//                }
+//                .sheet(isPresented: $navigateToSettings) {
+//                    SettingsView()
+//                        .environmentObject(userPreferences)
+//                        .environmentObject(dataManager)
+//                }
             }
             
             ScrollView {
@@ -70,7 +70,7 @@ struct ProfileView: View {
                                     .scaledToFill()
                                     .frame(width: 120, height: 120)
                                     .clipShape(Circle())
-                                    .overlay(Circle().stroke(Color.blue, lineWidth: 3))
+                                    .overlay(Circle().stroke(Color.lightBlue, lineWidth: 3))
                             } else {
                                 // Placeholder when no image selected
                                 Image(systemName: "person.circle.fill")
@@ -83,7 +83,7 @@ struct ProfileView: View {
                             PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
                                 Image(systemName: "camera.circle.fill")
                                     .font(.system(size: 35))
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(.lightBlue)
                                     .background(Circle().fill(Color.white))
                             }
                             .offset(x: 5, y: 5)
@@ -134,7 +134,7 @@ struct ProfileView: View {
                                 isEditingUsername = true
                             }) {
                                 Image(systemName: "pencil.circle.fill")
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(.primaryBlue)
                                     .font(.title2)
                             }
                         }
@@ -184,11 +184,12 @@ struct ProfileView: View {
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(10)
-                            .contentShape(Rectangle())  // ← Makes entire area tappable
+                            .contentShape(Rectangle())
+                            
                         }
-                        .buttonStyle(.plain)  // ← IMPORTANT: Makes button work properly
+                        .buttonStyle(.plain)
                         
-                        // Dropdown content - SHOWS WHEN EXPANDED
+                        // Dropdown content
                         if isCompletedExpanded {
                             VStack(spacing: 0) {
                                 if completedTrailDetails.isEmpty {
@@ -210,7 +211,7 @@ struct ProfileView: View {
                                             //Add navigation part here
                                             Spacer()
                                             Image(systemName: "checkmark.circle.fill")
-                                                .foregroundColor(.green)
+                                                .foregroundColor(.primaryGreen)
                                         }
                                         .padding()
                                         
@@ -273,7 +274,7 @@ struct ProfileView: View {
                                     .padding(.trailing, 20)
                                     .padding(.top, 10)
                                     .bold()
-                                    .foregroundColor(userPreferences.trailPreferences.helper ? .green : .gray)
+                                    .foregroundColor(userPreferences.trailPreferences.helper ? .primaryGreen : .gray)
                             }
                         }
                         
@@ -287,12 +288,17 @@ struct ProfileView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.green)
+                            .background(Color.primaryGreen)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 10)
+                        .sheet(isPresented: $navigateToSettings) {
+                            SettingsView()
+                                .environmentObject(userPreferences)
+                                .environmentObject(dataManager)
+                        }
                     }
                 }
                 .padding(.bottom, 20)
@@ -350,7 +356,7 @@ struct StatCard: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title)
-                .foregroundColor(.green)
+                .foregroundColor(.primaryGreen)
             
             Text(value)
                 .font(.title2)

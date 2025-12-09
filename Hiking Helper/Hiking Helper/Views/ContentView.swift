@@ -21,5 +21,6 @@ struct ContentView: View {
                 }
             }
         }
+        .background(.backgroundColor1)
     }
 }

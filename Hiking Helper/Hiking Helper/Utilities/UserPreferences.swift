@@ -55,8 +55,8 @@ struct TrailPreferences: Codable {
     var currentCapability: String
     var difficulty: String
     var elevation: String
-    var location: String?  // Keep for backward compatibility
-    var selectedStates: [String]  // NEW: Array of selected state codes (e.g., ["SC", "NC", "GA"])
+    var location: String?
+    var selectedStates: [String]  //  Array of selected state codes (e.g., ["SC", "NC", "GA"])
     var travelRadius: String
     var hasCompletedOnboarding: Bool
     var minDistance: Double
@@ -75,7 +75,7 @@ struct TrailPreferences: Codable {
             difficulty: "Easy",
             elevation: "Low",
             location: "SC",
-            selectedStates: [],  // Empty array by default
+            selectedStates: [],
             travelRadius: "",
             hasCompletedOnboarding: false,
             minDistance: 0.0,

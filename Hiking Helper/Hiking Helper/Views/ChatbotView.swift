@@ -84,8 +84,8 @@ struct ChatbotView: View {
                     isPresentedBot = false
                                 }){
                                     Image(systemName: "house.fill")
-                                        .font(.title)
                                         .foregroundColor(.primaryGreen)
+                        .controlSize(.large)
                                 }
             }
         }

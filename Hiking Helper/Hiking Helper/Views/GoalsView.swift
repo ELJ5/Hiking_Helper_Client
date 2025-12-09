@@ -60,7 +60,7 @@ struct GoalsView: View {
                 }
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.accentColor)
+                .foregroundColor(.darkGreen)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .background(Color(.systemBackground))
@@ -114,13 +114,14 @@ struct GoalsView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "house.fill")
                         .font(.title2)
-                        .foregroundColor(.green)
+                        .foregroundColor( .primaryGreen)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingGenerateSheet = true }) {
                     Image(systemName: "sparkles")
                 }
+                .foregroundColor(.primaryGreen)
             }
         }
         .sheet(isPresented: $showingGenerateSheet) {
@@ -174,7 +175,7 @@ struct ProgressHeaderView: View {
                     Text("\(Int(percentage))%")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.darkGreen)
                     Text("\(trailsCompleted) trails hiked")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -190,7 +191,7 @@ struct ProgressHeaderView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [.green, .blue]),
+                                gradient: Gradient(colors: [ .primaryGreen,  .primaryBlue]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -219,7 +220,7 @@ struct GoalRowView: View {
             Button(action: onToggle) {
                 Image(systemName: goal.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundColor(goal.isCompleted ? .green : .gray)
+                    .foregroundColor(goal.isCompleted ?  .primaryGreen : .gray)
             }
             .buttonStyle(PlainButtonStyle())
             
@@ -255,7 +256,7 @@ struct GoalRowView: View {
                 if goal.isCompleted, let completedAt = goal.completedAt {
                     Text("Completed \(completedAt, style: .relative) ago")
                         .font(.caption)
-                        .foregroundColor(.green)
+                        .foregroundColor( .primaryGreen)
                 }
             }
             
@@ -268,8 +269,8 @@ struct GoalRowView: View {
         switch category {
         case .endurance: return .red
         case .elevation: return .purple
-        case .distance: return .blue
-        case .frequency: return .green
+        case .distance: return  .blue
+        case .frequency: return  .green
         case .exploration: return .orange
         case .skills: return .teal
         }
@@ -316,7 +317,7 @@ struct GenerateGoalsSheet: View {
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.white)
                     }
-                    .listRowBackground(Color.accentColor)
+                    .listRowBackground(Color.darkGreen)
                 }
             }
             .navigationTitle("Generate Goals")
@@ -369,7 +370,7 @@ struct EmptyGoalsView: View {
                 Button(action: onGenerate) {
                     Label("Generate Goals", systemImage: "sparkles")
                         .padding()
-                        .background(Color.accentColor)
+                        .background(Color.darkGreen)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -443,7 +444,7 @@ struct ErrorView: View {
             Button(action: onRetry) {
                 Label("Try Again", systemImage: "arrow.clockwise")
                     .padding()
-                    .background(Color.accentColor)
+                    .background(Color.darkGreen)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
@@ -520,7 +521,7 @@ struct StatRow: View {
             Spacer()
             Text(value)
                 .fontWeight(.semibold)
-                .foregroundColor(.accentColor)
+                .foregroundColor(.darkGreen)
         }
     }
 }

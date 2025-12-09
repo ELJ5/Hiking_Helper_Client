@@ -13,7 +13,7 @@ class DataManager: ObservableObject {
     @Published var allTrails: [Trail] = []
     @Published var isLoading: Bool = false
     @Published var lastLoadedDate: Date?
-    @Published var loadedStates: [String] = []  // Track which states are loaded
+    @Published var loadedStates: [String] = []
     
     private var hasLoadedData = false
     
@@ -24,7 +24,7 @@ class DataManager: ObservableObject {
         self.userPreferences = userPreferences
     }
     
-    // COMPUTED property - filters cached data without reloading
+    // filters cached data without reloading
     var filteredTrails: [Trail] {
         let prefs = userPreferences.trailPreferences
         
@@ -71,11 +71,10 @@ class DataManager: ObservableObject {
     
     // Helper to get state code from trail's state field
     private func getStateCode(from stateString: String) -> String {
-        // If it's already a 2-letter code
         if stateString.count == 2 {
             return stateString.uppercased()
         }
-        // Otherwise, try to find the code from the name
+        // find the code from the name
         return StateData.stateCode(for: stateString) ?? stateString.uppercased()
     }
     

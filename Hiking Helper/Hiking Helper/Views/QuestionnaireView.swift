@@ -6,138 +6,166 @@ struct QuestionnaireView: View {
     @EnvironmentObject var dataManager: DataManager
     
     @State private var questions: [Question] = []
-    @State private var showResults = false  // Can remove this too if not used
+    @State private var showResults = false
     @State private var navigateToStateSelection = false
     @State private var currentQuestion = 0
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Hiking Questionnaire")
-                    .font(.largeTitle)
-                    .bold()
+            VStack(spacing: 0) {
+                // Image at top from Assets
+                Image("HH")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 150)
+                    .padding(.top, 20)
                     .padding(.bottom, 10)
                 
-                if !questions.isEmpty {
-                    // Progress indicator
-                    ProgressView(value: Double(currentQuestion + 1), total: Double(questions.count))
-                        .tint(.green)
-                    
-                    // Current question
-                    if currentQuestion < questions.count {
-                        let question = questions[currentQuestion]
+                ScrollView {
+                    VStack(spacing: 20) {
+                        if currentQuestion == 0 {
+                            Text("Welcome to Hiking Helper")
+                                .font(.largeTitle)
+                                .bold()
+                                .multilineTextAlignment(.center)
+                                .padding(.bottom, 10)
+                                .transition(.opacity.combined(with: .scale))
+                        }
                         
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text("Question \(currentQuestion + 1) of \(questions.count)")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                        if !questions.isEmpty {
+                            // Progress indicator
+                            ProgressView(value: Double(currentQuestion + 1), total: Double(questions.count))
+                                .tint(.darkGreen)
+                                .padding(.horizontal, 30)
                             
-                            Text(question.text)
-                                .font(.headline)
-                                .multilineTextAlignment(.leading)
-                            
-                            // Handle state selection question
-                            if question.preferenceKey == "stateSelection" {
-                                VStack(spacing: 12) {
-                                    // Show currently selected states
-                                    if !userPreferences.trailPreferences.selectedStates.isEmpty {
-                                        HStack {
-                                            Text("Selected:")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                            Text(userPreferences.trailPreferences.selectedStatesText)
-                                                .font(.subheadline)
-                                                .fontWeight(.medium)
-                                                .foregroundColor(.green)
-                                        }
-                                        .padding(.vertical, 4)
-                                    }
+                            // Current question - Centered
+                            if currentQuestion < questions.count {
+                                let question = questions[currentQuestion]
+                                
+                                VStack(spacing: 15) {
+                                    Text("Question \(currentQuestion + 1) of \(questions.count)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                        .multilineTextAlignment(.center)
                                     
-                                    Button(action: {
-                                        navigateToStateSelection = true
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "map.fill")
-                                            Text(userPreferences.trailPreferences.selectedStates.isEmpty
-                                                 ? "Select States"
-                                                 : "Change Selection")
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.green)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                    }
+                                    Text(question.text)
+                                        .font(.headline)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
                                     
-                                    if !userPreferences.trailPreferences.selectedStates.isEmpty {
-                                        Button(action: {
-                                            // Mark as answered and continue
-                                            questions[currentQuestion].selectedOption = userPreferences.trailPreferences.selectedStatesText
-                                            QuestionnaireManager.save(questions)
-                                            
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                                withAnimation {
-                                                    advanceToNextQuestion()
+                                    // Handle state selection question
+                                    if question.preferenceKey == "stateSelection" {
+                                        VStack(spacing: 12) {
+                                            // Show currently selected states
+                                            if !userPreferences.trailPreferences.selectedStates.isEmpty {
+                                                HStack {
+                                                    Text("Selected:")
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.secondary)
+                                                    Text(userPreferences.trailPreferences.selectedStatesText)
+                                                        .font(.subheadline)
+                                                        .fontWeight(.medium)
+                                                        .foregroundColor(.primaryGreen)
                                                 }
+                                                .padding(.vertical, 4)
                                             }
-                                        }) {
-                                            Text("Continue with \(userPreferences.trailPreferences.selectedStates.count) state\(userPreferences.trailPreferences.selectedStates.count == 1 ? "" : "s")")
+                                            
+                                            Button(action: {
+                                                navigateToStateSelection = true
+                                            }) {
+                                                HStack {
+                                                    Image(systemName: "map.fill")
+                                                    Text(userPreferences.trailPreferences.selectedStates.isEmpty
+                                                         ? "Select States"
+                                                         : "Change Selection")
+                                                }
                                                 .frame(maxWidth: .infinity)
                                                 .padding()
-                                                .background(Color.blue)
+                                                .background(Color.green)
                                                 .foregroundColor(.white)
                                                 .cornerRadius(10)
+                                            }
+                                            
+                                            if !userPreferences.trailPreferences.selectedStates.isEmpty {
+                                                Button(action: {
+                                                    questions[currentQuestion].selectedOption = userPreferences.trailPreferences.selectedStatesText
+                                                    QuestionnaireManager.save(questions)
+                                                    
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                        withAnimation {
+                                                            advanceToNextQuestion()
+                                                        }
+                                                    }
+                                                }) {
+                                                    Text("Continue with \(userPreferences.trailPreferences.selectedStates.count) state\(userPreferences.trailPreferences.selectedStates.count == 1 ? "" : "s")")
+                                                        .frame(maxWidth: .infinity)
+                                                        .padding()
+                                                        .background(Color.primaryBlue)
+                                                        .foregroundColor(.white)
+                                                        .cornerRadius(10)
+                                                }
+                                            }
                                         }
+                                        .padding(.horizontal, 20)
+                                    } else {
+                                        // Radio button options - Centered
+                                        VStack(spacing: 12) {
+                                            ForEach(question.options, id: \.self) { option in
+                                                Button(action: {
+                                                    selectOption(option, for: currentQuestion)
+                                                }) {
+                                                    HStack {
+                                                        Image(systemName: question.selectedOption == option ? "circle.inset.filled" : "circle")
+                                                            .foregroundColor(.darkBlue)
+                                                        Text(option)
+                                                            .foregroundColor(.primary)
+                                                        Spacer()
+                                                    }
+                                                    .padding()
+                                                    .background(
+                                                        RoundedRectangle(cornerRadius: 10)
+                                                            .fill(question.selectedOption == option ? Color.green.opacity(0.1) : Color(.systemGray6))
+                                                    )
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 10)
+                                                            .stroke(question.selectedOption == option ? Color.green : Color.clear, lineWidth: 2)
+                                                    )
+                                                }
+                                                .buttonStyle(.plain)
+                                            }
+                                        }
+                                        .padding(.horizontal, 30)
                                     }
                                 }
-                            } else {
-                                // Radio button options
-                                ForEach(question.options, id: \.self) { option in
-                                    Button(action: {
-                                        selectOption(option, for: currentQuestion)
-                                    }) {
-                                        HStack {
-                                            Image(systemName: question.selectedOption == option ? "circle.inset.filled" : "circle")
-                                                .foregroundColor(.blue)
-                                            Text(option)
-                                                .foregroundColor(.primary)
-                                        }
-                                        .padding(.vertical, 6)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                                .padding(.vertical, 20)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(15)
+                                .shadow(color: .gray.opacity(0.2), radius: 5)
+                                .padding(.horizontal, 20)
                             }
+                        } else {
+                            // Show loading state
+                            ProgressView("Loading questions...")
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .cornerRadius(10)
-                        .shadow(radius: 2)
+                        
+                        Spacer(minLength: 40)
                     }
-                } else {
-                    // Show loading state
-                    ProgressView("Loading questions...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                
-                Spacer()
             }
-            .padding()
             .onAppear(perform: loadQuestions)
-            // REMOVED: .navigationDestination(isPresented: $navigateToResults)
             .navigationDestination(isPresented: $navigateToStateSelection) {
                 StateSelectionView(isOnboarding: true) {
-                    // Called when user completes state selection
                     navigateToStateSelection = false
                     
-                    // Update the question answer
                     if !userPreferences.trailPreferences.selectedStates.isEmpty {
                         questions[currentQuestion].selectedOption = userPreferences.trailPreferences.selectedStatesText
                         QuestionnaireManager.save(questions)
                     }
                 }
                 .environmentObject(userPreferences)
-                .environmentObject(dataManager)
+                .environmentObject(dataManager).navigationBarBackButtonHidden(true)
             }
         }
     }
@@ -145,11 +173,9 @@ struct QuestionnaireView: View {
     // MARK: - Functions
     
     func loadQuestions() {
-        // Load saved progress if exists
         if let saved = QuestionnaireManager.load() {
             questions = saved
         } else {
-            // Initialize questions with preference keys
             questions = [
                 Question(
                     text: "How can Hiking Helper assist you?",
@@ -200,7 +226,7 @@ struct QuestionnaireView: View {
                 
                 Question(
                     text: "Which states would you like to explore trails in?",
-                    options: [], // Empty - handled by StateSelectionView
+                    options: [],
                     preferenceKey: "stateSelection"
                 ),
                 
@@ -217,7 +243,6 @@ struct QuestionnaireView: View {
         questions[questionIndex].selectedOption = option
         QuestionnaireManager.save(questions)
         
-        // Auto-advance after selection
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation {
                 advanceToNextQuestion()
@@ -234,18 +259,13 @@ struct QuestionnaireView: View {
     }
     
     func submitAnswers() {
-        // Save final state
         QuestionnaireManager.save(questions)
-        
-        // Update user preferences
         updateUserPreferences()
         
-        // Mark onboarding as complete - THIS will make needsOnboarding return false
         var prefs = userPreferences.trailPreferences
         prefs.hasCompletedOnboarding = true
         userPreferences.trailPreferences = prefs
         
-        // Load hiking data for selected states
         dataManager.loadTrailsIfNeeded()
         
         print("✅ Preferences saved: \(userPreferences.trailPreferences)")
@@ -256,7 +276,6 @@ struct QuestionnaireView: View {
     func updateUserPreferences() {
         var prefs = userPreferences.trailPreferences
         
-        // Map each question to preference property
         for question in questions {
             guard let answer = question.selectedOption else { continue }
             
@@ -269,12 +288,10 @@ struct QuestionnaireView: View {
                 
             case "desiredDistance":
                 prefs.desiredDistance = answer
-                // Also update max distance for filtering
                 prefs.maxDistance = parseDistance(answer)
                 
             case "currentCapability":
                 prefs.currentCapability = answer
-                // Update min distance
                 prefs.minDistance = parseMinDistance(answer)
                 
             case "difficulty":
@@ -284,7 +301,6 @@ struct QuestionnaireView: View {
                 prefs.elevation = answer.components(separatedBy: " (").first ?? answer
                 
             case "stateSelection":
-                // States are already saved directly to preferences via StateSelectionView
                 break
                 
             case "travelRadius":
@@ -295,11 +311,9 @@ struct QuestionnaireView: View {
             }
         }
         
-        // Save updated preferences
         userPreferences.trailPreferences = prefs
     }
     
-    // Helper functions to convert distance strings to double
     func parseDistance(_ distanceString: String) -> Double {
         switch distanceString {
         case "0-2 miles": return 2.0
