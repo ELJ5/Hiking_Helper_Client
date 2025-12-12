@@ -42,20 +42,6 @@ struct ProfileView: View {
                
                 Spacer()
             
-//                Button(action: {
-//                    navigateToSettings = true
-//                }){
-//                    Image(systemName: "gearshape.fill")
-//                        .font(.title)
-//                        .foregroundColor(.primaryBlue)
-//                        .padding(.trailing, 10)
-//                        .padding(.top, 10)
-//                }
-//                .sheet(isPresented: $navigateToSettings) {
-//                    SettingsView()
-//                        .environmentObject(userPreferences)
-//                        .environmentObject(dataManager)
-//                }
             }
             
             ScrollView {

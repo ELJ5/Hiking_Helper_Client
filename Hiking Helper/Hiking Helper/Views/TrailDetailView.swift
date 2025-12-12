@@ -33,26 +33,7 @@ struct TrailDetailView: View {
     
     var body: some View {
         ScrollView {
-//            HStack{
-//                Button(action: {
-//                    navigateToHome = true
-//                }){
-//                    Image(systemName: "house.fill")
-//                        .font(.title)
-//                        .foregroundColor(.green)
-//                        .padding(.leading, 10)
-//                        .padding(.top, 10)
-//                }
-//                .navigationDestination(isPresented: $navigateToHome) {
-//                    HomeView()
-//                      .environmentObject(userPreferences)
-//                      .environmentObject(dataManager)
-//                      .transition(
-//                          .move(edge: .leading)
-//                          .combined(with: .opacity)
-//                      )
-//                }
-//            }
+
             VStack(spacing: 0) {
                 // Map Header
                 ZStack(alignment: .topTrailing) {
@@ -321,17 +302,17 @@ struct StatBox: View {
 struct TrailDetailView_Previews: PreviewProvider {
     static var previews: some View {
         let sampleTrail = Trail(
-            id: 1,
-            trailName: "Table Rock Trail",
-            state: "South Carolina",
-            latitude: 35.0211,
-            longitude: -82.7314,
-            distanceMiles: 6.8,
-            elevationGainFeet: 2150,
+            id: 1001,
+            trailName: "Palmetto Trail",
+            state: "SC",
+            latitude: 34.8526,
+            longitude: -82.3940,
+            distanceMiles: 12.5,
+            elevationGainFeet: 1200,
             difficultyLevel: "Moderate",
-            terrainTypes: ["Rocky", "Forest", "Mountain"],
-            description: "A beautiful trail leading to stunning views from Table Rock summit. The trail features rocky terrain and forest sections with a rewarding panoramic view at the top.",
-            userRating: 4.7,
+            terrainTypes: ["Rocky", "Forest"],
+            description: "Beautiful forested trail with scenic overlooks and moderate elevation changes.",
+            userRating: 4.5,
             completed: false
         )
         
